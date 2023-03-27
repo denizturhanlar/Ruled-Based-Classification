@@ -11,3 +11,6 @@ The Persona.csv dataset contains the prices of products sold by an international
 - Country: The country of the customer
 - Age: Age of the customer
 
+## Before Application
+
+![before application](https://user-images.githubusercontent.com/126112467/227958443-6e0f1514-384d-4f63-9969-13cc83712f0a.png)
