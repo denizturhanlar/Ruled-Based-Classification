@@ -14,3 +14,8 @@ The Persona.csv dataset contains the prices of products sold by an international
 ## Before Application
 
 ![before application](https://user-images.githubusercontent.com/126112467/227958443-6e0f1514-384d-4f63-9969-13cc83712f0a.png)
+
+## After Application
+
+![after applications](https://user-images.githubusercontent.com/126112467/227960697-a01efdd0-c4b3-4bd2-939c-94daf88ecd1e.png)
+
