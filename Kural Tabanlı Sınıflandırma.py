@@ -1,26 +1,25 @@
-# Kural Tabanlı Sınıflandırma ile Potansiyel Müşteri Getirisi Hesaplama
+# Customer Potential Revenue Estimation with Rule-Based Classification
 #############################################
-# İş Problemi
+# Business Problem
 #############################################
-# Bir oyun şirketi müşterilerinin bazı özelliklerini kullanarak seviye tabanlı (level based) yeni müşteri tanımları (persona)
-# oluşturmak ve bu yeni müşteri tanımlarına göre segmentler oluşturup bu segmentlere göre yeni gelebilecek müşterilerin şirkete
-# ortalama ne kadar kazandırabileceğini tahmin etmek istemektedir.
+# A gaming company wants to create level-based new customer personas and estimate
+#how much potential revenue they can generate based on these new customer definitions by using some characteristics of their customers.
+#For example: The company wants to estimate how much revenue an IOS user who is 25 years old and from Turkey can generate on average.
 
-# Örneğin: Türkiye’den IOS kullanıcısı olan 25 yaşındaki bir erkek kullanıcının ortalama ne kadar kazandırabileceği belirlenmek isteniyor.
 #############################################
-# Veri Seti Hikayesi
+# Dataset Story
 #############################################
-# Persona.csv veri seti uluslararası bir oyun şirketinin sattığı ürünlerin fiyatlarını ve bu ürünleri satın alan kullanıcıların bazı
-# demografik bilgilerini barındırmaktadır. Veri seti her satış işleminde oluşan kayıtlardan meydana gelmektedir. Bunun anlamı tablo
-# tekilleştirilmemiştir. Diğer bir ifade ile belirli demografik özelliklere sahip bir kullanıcı birden fazla alışveriş yapmış olabilir.
+# The Persona.csv dataset contains the prices of products sold by an international gaming company and some demographic information of users who
+#bought these products. The dataset consists of records generated in each sales transaction. 
+#This means that the table is not deduplicated. In other words, a user with certain demographic characteristics may have made multiple purchases.
 
-# Price: Müşterinin harcama tutarı
-# Source: Müşterinin bağlandığı cihaz türü
-# Sex: Müşterinin cinsiyeti
-# Country: Müşterinin ülkesi
-# Age: Müşterinin yaşı
+#Price: The amount spent by the customer
+#Source: The type of device the customer connected from
+#Sex: Gender of the customer
+#Country: The country of the customer
+#Age: Age of the customer
 
-################# Uygulama Öncesi #####################
+################# Before Application  #####################
 
 #    PRICE   SOURCE   SEX COUNTRY  AGE
 # 0     39  android  male     bra   17
@@ -29,7 +28,7 @@
 # 3     29  android  male     tur   17
 # 4     49  android  male     tur   17
 
-################# Uygulama Sonrası #####################
+################# After Application  #####################
 
 #       customers_level_based        PRICE SEGMENT
 # 0   BRA_ANDROID_FEMALE_0_18  1139.800000       A
@@ -39,115 +38,116 @@
 # 4  BRA_ANDROID_FEMALE_41_66   236.666667       C
 
 
-# PROJE GÖREVLERİ
+# Project Task
 #############################################
-# GÖREV 1: Aşağıdaki soruları yanıtlayınız.
+# TASK 1: Answer the following questions.
 #############################################
+# Q1: Read the persona.csv file and show the general information about the dataset.
 
-# Soru 1: persona.csv dosyasını okutunuz ve veri seti ile ilgili genel bilgileri gösteriniz.
-#kütüpahaneyi import edip csv dosyamızı çekelim
+# let's import the libraries and read the csv file
 import pandas as pd
 pd.set_option("display.max_rows", None)
 df = pd.read_csv("WEEK02/persona.csv")
 df.shape
 df.head()
 
-# Soru 2: Kaç unique SOURCE vardır? Frekansları nedir?
+# Q2: How many unique SOURCE are there? What are their frequencies?
 df["SOURCE"].nunique()
 df["SOURCE"].value_counts()
 
 
-# Soru 3: Kaç unique PRICE vardır?
+# Q3: How many unique PRICEs are there?
 df["PRICE"].unique()
 df["PRICE"].nunique()
 df["PRICE"].value_counts()
 
-# Soru 4: Hangi PRICE'dan kaçar tane satış gerçekleşmiş?
-df["PRICE"].value_counts()  #kaçar tane olduğunu value_counts() ile buluruz
+#  How many sales were made from which PRICE?
+df["PRICE"].value_counts()  #we use value_counts() command for the find how many 
 
-# Soru 5: Hangi ülkeden kaçar tane satış olmuş?
+# Q5: How many sales were made from which country?
 df["COUNTRY"].nunique()
 df["COUNTRY"].value_counts()
 
-# Soru 6: Ülkelere göre satışlardan toplam ne kadar kazanılmış?
-#ülkelere göre dendiği için kırılıma bakmamız lazım
+# Q6: How much was earned in total from sales by country?
 df.groupby("COUNTRY")["PRICE"].sum()
 df.groupby("COUNTRY").agg({"PRICE":"sum"})
 
-# Soru 7: SOURCE türlerine göre göre satış sayıları nedir?
+# Q7: What are the sales numbers according to SOURCE types?
 df.groupby("SOURCE")["PRICE"].count()
 df["SOURCE"].value_counts()
 
-# Soru 8: Ülkelere göre PRICE ortalamaları nedir?
+# Q8: What are the PRICE averages by country?
 df.groupby("COUNTRY")["PRICE"].mean()
 df.groupby("COUNTRY").agg({"PRICE":"mean"})
 
-# Soru 9: SOURCE'lara göre PRICE ortalamaları nedir?
+# Q9: What are the PRICE averages by SOURCE?
 df.groupby("SOURCE")["PRICE"].mean()
 df.groupby("SOURCE").agg({"PRICE":"mean"})
 
-# Soru 10: COUNTRY-SOURCE kırılımında PRICE ortalamaları nedir?
+#  Q10: What are the PRICE averages in the COUNTRY-SOURCE breakdown?
 df.groupby(["SOURCE","COUNTRY"])["PRICE"].mean()
 df.groupby(["SOURCE","COUNTRY"]).agg({"PRICE":"mean"})
 
 #############################################
-# GÖREV 2: COUNTRY, SOURCE, SEX, AGE kırılımında ortalama kazançlar nedir?
+# TASK 2: What are the average earnings in breakdown of COUNTRY, SOURCE, SEX, AGE?
 
 df.groupby(["SOURCE","COUNTRY","SEX","AGE"])["PRICE"].mean()
 
 #############################################
-# GÖREV 3: Çıktıyı PRICE'a göre sıralayınız.
-# Önceki sorudaki çıktıyı daha iyi görebilmek için sort_values metodunu azalan olacak şekilde PRICE'a uygulayınız.
-# Çıktıyı agg_df olarak kaydediniz.
+# # TASK 3: Sort the output by PRICE.
+# To see the output of the previous question better, apply the sort_values method to PRICE in descending order.
+# Save the output as agg_df.
 
-agg_df = df.groupby(["COUNTRY","SOURCE","SEX","AGE"]).agg({"PRICE": "mean"}).sort_values("PRICE",ascending=False)   #çıktıyı daha iyi görmek için sort_values metodunu azalan olacak şekilde PRICE'a uyguladık
+agg_df = df.groupby(["COUNTRY","SOURCE","SEX","AGE"]).agg({"PRICE": "mean"}).sort_values("PRICE",ascending=False)  
+#to better see the output, we applied the sort_values method to PRICE in descending order
 
 #############################################
-# GÖREV 4: Indekste yer alan isimleri değişken ismine çeviriniz.
+# TASK 4: Convert the names in the index to variable names.
 #############################################
-# Üçüncü sorunun çıktısında yer alan PRICE dışındaki tüm değişkenler index isimleridir.
-# Bu isimleri değişken isimlerine çeviriniz.
+# All variables except PRICE in the output of the third question are index names.
+# Convert these names to variable names
+# Hint: reset_index()
+# agg_df.reset_index(inplace=True)
 
-agg_df = agg_df.reset_index() #index isimlerini değiştirmek için reset_index() kullanırız
+agg_df = agg_df.reset_index() #we use reset_index() to change the index names
 agg_df.head()
 
 #############################################
-# GÖREV 5: AGE değişkenini kategorik değişkene çeviriniz ve agg_df'e ekleyiniz.
+# TASK 5: Convert AGE variable to categorical variable and add it to agg_df.
 #############################################
-# Age sayısal değişkenini kategorik değişkene çeviriniz.
-# Aralıkları ikna edici olacağını düşündüğünüz şekilde oluşturunuz.
-# Örneğin: '0_18', '19_23', '24_30', '31_40', '41_70'
+# Convert the numeric variable age to a categorical variable.
+# Create the intervals in whatever way you think will be persuasive.
+# For example: '0_18', '19_23', '24_30', '31_40', '41_70'
 
 agg_df["AGE"].max()
-# AGE değişkeninin nerelerden bölüneceğini belirtelim:
+# Let's specify where the AGE variable will be divided from:
 bins = [0, 18, 23, 30, 40, agg_df["AGE"].max()]
 
-# Bölünen noktalara karşılık isimlendirmelerin ne olacağını ifade edelim:
+# Let's express what the nomenclature will be in response to the dividing points:
 mylabels = ['0_18', '19_23', '24_30', '31_40', '41_' + str(agg_df["AGE"].max())]
 
 
-# age'i bölelim:
+# divide the AGE
 agg_df["age_cat"] = pd.cut(agg_df["AGE"],bins,labels=mylabels)
 agg_df.head()
 
 #############################################
-# GÖREV 6: Yeni level based müşterileri tanımlayınız ve veri setine değişken olarak ekleyiniz.
-
-# customers_level_based adında bir değişken tanımlayınız ve veri setine bu değişkeni ekleyiniz.
-# Dikkat!
-# list comp ile customers_level_based değerleri oluşturulduktan sonra bu değerlerin tekilleştirilmesi gerekmektedir.
-# Örneğin birden fazla şu ifadeden olabilir: USA_ANDROID_MALE_0_18
-# Bunları groupby'a alıp price ortalamalarını almak gerekmektedir.
+# TASK 6: Define new level based customers and add them as variables to the dataset.
+# Define a variable named customers_level_based and add this variable to the dataset.
+# CAUTION!
+# After creating customers_level_based values with list comp, these values need to be deduplicated.
+# For example, it could be more than one of the following: USA_ANDROID_MALE_0_18
+# It is necessary to take them to groupby and get the price average.
 
 #customers_level_based
-# değişken isimleri:
-# gözlem değerlerine nasıl erişiriz?
+#variable names:
+# how do we access the observation values?
 
 [row[0].upper() + "_" +row[1].upper() + "_" + row[2].upper() + "_" + row[5].upper() for row in agg_df.values]
 
-# COUNTRY, SOURCE, SEX ve age_cat değişkenlerinin DEĞERLERİNİ yan yana koymak ve alt tireyle birleştirmek istiyoruz.
-# Bunu list comprehension ile yapabiliriz.
-# Yukarıdaki döngüdeki gözlem değerlerinin bize lazım olanlarını seçecek şekilde işlemi gerçekletirelim:
+# We want to put the VALUES of the COUNTRY, SOURCE, SEX and age_cat variables side by side and combine them with the hyphen.
+# We do this by list comphrensions
+# Let's perform the operation in such a way that we choose the observation values in the above cycle that we need:
 
 
 agg_df["customers_level_based"] = [row[0].upper() + "_" +row[1].upper() + "_" + row[2].upper() + "_" + row[5].upper() for row in agg_df.values]
@@ -157,51 +157,49 @@ agg_df["customers_level_based_2"] = agg_df[["COUNTRY","SOURCE","SEX","age_cat"]]
 agg_df.head()
 
 
-# Gereksiz değişkenleri çıkaralım:
+# Let's remove unnecessary variables:
 agg_df = agg_df[["customers_level_based","PRICE"]]
 agg_df.head()
 
 
 
-
-# Asıl isteğimize yaklaştık ama ufak bir problem var. Birçok aynı segment olacak.
-# örneğin USA_ANDROID_MALE_0_18 segmentinden birçok sayıda olabilir.
-# kontrol edelim:
+# We are close to our original request, but there is a small problem. There will be many identical segments.
+# for example, there may be many numbers from the USA_ANDROID_MALE_0_18 segment.
+# lets check
 
 agg_df["customers_level_based"].value_counts()
 
-# Bu sebeple segmentlere göre groupby yaptıktan sonra price ortalamalarını almalı ve segmentleri tekilleştirmeliyiz.
+#Therefore, after making a groupby segment, we should take the price averages and deduplicate the segments.
 agg_df = agg_df.groupby("customers_level_based").agg({"PRICE": "mean"})
 agg_df.head()
 
-# groupby sebebiyle level_base_indexte yer alıyor
-# customers_level_based index'te yer almaktadır. Bunu değişkene çevirelim.
+# because of groupby, it is located in level_base_index
+# it is located in the customers_level_based index. Let's turn this into a variable.
 
 agg_df = agg_df.reset_index()
 agg_df.head()
-# kontrol edelim. her bir persona'nın 1 tane olmasını bekleriz:
+# let's check it out. we expect each persona to have 1:
 
 
 agg_df["customers_level_based"].value_counts()
 
 #############################################
-# GÖREV 7: Yeni müşterileri (USA_ANDROID_MALE_0_18) segmentlere ayırınız.
-# PRICE'a göre segmentlere ayırınız,
-# segmentleri "SEGMENT" isimlendirmesi ile agg_df'e ekleyiniz,
-# segmentleri betimleyiniz,
-
+# TASK 7: Segment new customers (USA_ANDROID_MALE_0_18).
+# Segment by PRICE,
+# add segments to agg_df with "SEGMENT" naming,
+# describe the segments,
 
 agg_df["SEGMENT"] = pd.qcut(agg_df["PRICE"],4,labels= ["D","C","B","A"])
 agg_df.head()
 
 #############################################
-# GÖREV 8: Yeni gelen müşterileri sınıflandırınız ne kadar gelir getirebileceğini tahmin ediniz.
+# TASK 8: Classify the new customers and estimate how much income they can bring.
 #############################################
-# 33 yaşında ANDROID kullanan bir Türk kadını hangi segmente aittir ve ortalama ne kadar gelir kazandırması beklenir?
+# # Which segment does a 33-year-old Turkish woman using ANDROID belongs to and how much income is expected to earn on average?
 new_user = "TUR_ANDROID_FEMALE_31_40"
 agg_df[agg_df["customers_level_based"]== new_user]
 
-# 35 yaşında IOS kullanan bir Fransız kadını hangi segmente ve ortalama ne kadar gelir kazandırması beklenir?
+# In which segment and on average how much income would a 35-year-old French woman using iOS expect to earn?
 new_user = "FRA_IOS_FEMALE_31_40"
 agg_df[agg_df["customers_level_based"]== new_user]
 
